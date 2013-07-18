@@ -88,8 +88,10 @@ headToMaybeAndList l = let
 
 editGraph : Bool -> Point2D -> [Nodes] -> ProgramState -> (ProgramState, [Node])
 editGraph mouseDown mouseRelPos hoverNodes programState = let
-    noNodeDrag = let (mSelectedNode, lSelectedNode) = headToMaybeAndList hoverNodes
-      in ({ programState | mode <- Edit mSelectedNode }, lSelectedNode)
+    noNodeDrag = let
+        (mSelectedNode, lSelectedNode) = headToMaybeAndList hoverNodes
+        newMode = Edit (if mouseDown then mSelectedNode else Nothing)
+      in ({ programState | mode <- newMode }, lSelectedNode)
   in case programState.mode of
     Simulation           -> noNodeDrag
     Edit Nothing         -> noNodeDrag
