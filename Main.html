@@ -629,18 +629,19 @@ Elm.Main = function(elm){
   var editGraph_17 = F4(function(mouseDown_61, mouseRelPos_62, hoverNodes_63, programState_64){
     return function(){
       var noNodeDrag_65 = function(){
-        var _91000_66 = headToMaybeAndList_16(hoverNodes_63);
+        var _92000_66 = headToMaybeAndList_16(hoverNodes_63);
         var mSelectedNode_67 = function(){ 
-        switch (_91000_66.ctor) {
+        switch (_92000_66.ctor) {
           case 'Tuple2':
-            return _91000_66._0;
-        }_E.Case('Line 91, Column 55') }();
+            return _92000_66._0;
+        }_E.Case('Line 92, Column 42') }();
         var lSelectedNode_68 = function(){ 
-        switch (_91000_66.ctor) {
+        switch (_92000_66.ctor) {
           case 'Tuple2':
-            return _91000_66._1;
-        }_E.Case('Line 91, Column 55') }();
-        return {ctor:"Tuple2", _0:_N.replace([['mode',Edit_8(mSelectedNode_67)]], programState_64), _1:lSelectedNode_68};}();
+            return _92000_66._1;
+        }_E.Case('Line 92, Column 42') }();
+        var newMode_69 = Edit_8((mouseDown_61?mSelectedNode_67:Nothing));
+        return {ctor:"Tuple2", _0:_N.replace([['mode',newMode_69]], programState_64), _1:lSelectedNode_68};}();
       return function(){ 
       var case6 = programState_64.mode;
       switch (case6.ctor) {
@@ -648,92 +649,92 @@ Elm.Main = function(elm){
           switch (case6._0.ctor) {
             case 'Just':
               return function(){
-                var hovernode_74 = _L.Cons(case6._0._0,_L.Nil);
-                var newMode_75 = Edit_8((mouseDown_61?Just(case6._0._0):Nothing));
-                var newDragNode_76 = _N.replace([['pos',mouseRelPos_62]], case6._0._0);
-                var newNodes_77 = A3(D.insert, case6._0._0.nid, newDragNode_76, programState_64.graph.nodes);
-                var g_78 = programState_64.graph;
-                var newGraph_79 = _N.replace([['nodes',newNodes_77]], g_78);
-                var newProgramState_80 = {
+                var hovernode_75 = _L.Cons(case6._0._0,_L.Nil);
+                var newMode_76 = Edit_8((mouseDown_61?Just(case6._0._0):Nothing));
+                var newDragNode_77 = _N.replace([['pos',mouseRelPos_62]], case6._0._0);
+                var newNodes_78 = A3(D.insert, case6._0._0.nid, newDragNode_77, programState_64.graph.nodes);
+                var g_79 = programState_64.graph;
+                var newGraph_80 = _N.replace([['nodes',newNodes_78]], g_79);
+                var newProgramState_81 = {
                   _:{
                   },
-                  graph:newGraph_79,
-                  mode:newMode_75};
-                return {ctor:"Tuple2", _0:newProgramState_80, _1:hovernode_74};}();
+                  graph:newGraph_80,
+                  mode:newMode_76};
+                return {ctor:"Tuple2", _0:newProgramState_81, _1:hovernode_75};}();
             case 'Nothing':
               return noNodeDrag_65;
           }break;
         case 'Simulation':
           return noNodeDrag_65;
-      }_E.Case('Line 93, Column 6') }();}();});
-  var drawGraph_18 = F3(function(g_81, ncolor_82, ecolor_83){
-    return _L.append(A2(drawEdges_22, g_81, ecolor_83),A2(drawNodes_19, g_81, ncolor_82));});
-  var drawNodes_19 = F2(function(g_84, ncolor_85){
+      }_E.Case('Line 95, Column 6') }();}();});
+  var drawGraph_18 = F3(function(g_82, ncolor_83, ecolor_84){
+    return _L.append(A2(drawEdges_22, g_82, ecolor_84),A2(drawNodes_19, g_82, ncolor_83));});
+  var drawNodes_19 = F2(function(g_85, ncolor_86){
     return function(){
-      var n2f_86 = function(n_87){
-        return A2(drawNode_20, ncolor_85(n_87.nid), n_87.pos);};
-      return A2(L.map, n2f_86, D.values(g_84.nodes));}();});
-  var drawNode_20 = F2(function(c_88, p_89){
-    return A2(move, {ctor:"Tuple2", _0:p_89.x, _1:p_89.y}, A2(filled, c_88, circle(Gen.nodeRadius)));});
-  var drawEdge_21 = F3(function(c_90, p1_91, p2_92){
-    return A2(traced, solid(c_90), A2(segment, {ctor:"Tuple2", _0:p1_91.x, _1:Gen.neg(p1_91.y)}, {ctor:"Tuple2", _0:p2_92.x, _1:Gen.neg(p2_92.y)}));});
-  var drawEdges_22 = F2(function(g_93, ecolor_94){
+      var n2f_87 = function(n_88){
+        return A2(drawNode_20, ncolor_86(n_88.nid), n_88.pos);};
+      return A2(L.map, n2f_87, D.values(g_85.nodes));}();});
+  var drawNode_20 = F2(function(c_89, p_90){
+    return A2(move, {ctor:"Tuple2", _0:p_90.x, _1:p_90.y}, A2(filled, c_89, circle(Gen.nodeRadius)));});
+  var drawEdge_21 = F3(function(c_91, p1_92, p2_93){
+    return A2(traced, solid(c_91), A2(segment, {ctor:"Tuple2", _0:p1_92.x, _1:Gen.neg(p1_92.y)}, {ctor:"Tuple2", _0:p2_93.x, _1:Gen.neg(p2_93.y)}));});
+  var drawEdges_22 = F2(function(g_94, ecolor_95){
     return function(){
-      var e2f_95 = F3(function(__96, e_97, acc_98){
+      var e2f_96 = F3(function(__97, e_98, acc_99){
         return function(){ 
-        var case9 = {ctor:"Tuple2", _0:A2(D.lookup, e_97.idFrom, g_93.nodes), _1:A2(D.lookup, e_97.idTo, g_93.nodes)};
+        var case9 = {ctor:"Tuple2", _0:A2(D.lookup, e_98.idFrom, g_94.nodes), _1:A2(D.lookup, e_98.idTo, g_94.nodes)};
         switch (case9.ctor) {
           case 'Tuple2':
             switch (case9._0.ctor) {
               case 'Just':
                 switch (case9._1.ctor) {
                   case 'Just':
-                    return _L.Cons(A3(drawEdge_21, ecolor_94(e_97.eid), case9._0._0.pos, case9._1._0.pos),acc_98);
+                    return _L.Cons(A3(drawEdge_21, ecolor_95(e_98.eid), case9._0._0.pos, case9._1._0.pos),acc_99);
                 }break;
             }break;
         }
-        return acc_98; }();});
-      return A3(D.foldl, e2f_95, _L.Nil, g_93.edges);}();});
-  var relativeMousePosition_23 = function(posV_101){
+        return acc_99; }();});
+      return A3(D.foldl, e2f_96, _L.Nil, g_94.edges);}();});
+  var relativeMousePosition_23 = function(posV_102){
     return function(){
-      var fromCenter_102 = function(p_104){
-        return A2(P.min, p_104, ccenter_14);};
-      var negateY_103 = P.e_mul(A2(P.point2D, 1, -1));
-      return negateY_103(fromCenter_102(posV_101));}();};
-  var layout_25 = function(_161000_105){
+      var fromCenter_103 = function(p_105){
+        return A2(P.min, p_105, ccenter_14);};
+      var negateY_104 = P.e_mul(A2(P.point2D, 1, -1));
+      return negateY_104(fromCenter_103(posV_102));}();};
+  var layout_25 = function(_163000_106){
     return function(){ 
-    switch (_161000_105.ctor) {
+    switch (_163000_106.ctor) {
       case 'Tuple2':
         return function(){
-          var ncolor_109 = function(nid_116){
-            return (A2(any, function(hn_117){
-              return _N.eq(nid_116,hn_117.nid);}, _161000_105._1)?colors_15.node.hover:colors_15.node.normal);};
-          var ecolor_110 = function(eid_118){
-            return (A2(S.member, eid_118, hoverNodeEdges_108)?colors_15.edge.hover:colors_15.edge.normal);};
-          var hoverNodeEdges_108 = A3(L.foldl, function(n_114){
-            return function(acc_115){
-              return A2(S.union, n_114.edges, A2(S.union, n_114.bEdges, acc_115));};}, S.empty, _161000_105._1);
-          var info_111 = A2(flow, down, A2(L.map, function(x){
-            return plainText(x.label);}, _161000_105._1));
-          var drawnGraph_112 = layoutCollage_24(A3(drawGraph_18, _161000_105._0.graph, ncolor_109, ecolor_110));
-          var modeText_113 = function(){ 
-          var case17 = _161000_105._0.mode;
+          var ncolor_110 = function(nid_117){
+            return (A2(any, function(hn_118){
+              return _N.eq(nid_117,hn_118.nid);}, _163000_106._1)?colors_15.node.hover:colors_15.node.normal);};
+          var ecolor_111 = function(eid_119){
+            return (A2(S.member, eid_119, hoverNodeEdges_109)?colors_15.edge.hover:colors_15.edge.normal);};
+          var hoverNodeEdges_109 = A3(L.foldl, function(n_115){
+            return function(acc_116){
+              return A2(S.union, n_115.edges, A2(S.union, n_115.bEdges, acc_116));};}, S.empty, _163000_106._1);
+          var info_112 = A2(flow, down, A2(L.map, function(x){
+            return plainText(x.label);}, _163000_106._1));
+          var drawnGraph_113 = layoutCollage_24(A3(drawGraph_18, _163000_106._0.graph, ncolor_110, ecolor_111));
+          var modeText_114 = function(){ 
+          var case17 = _163000_106._0.mode;
           switch (case17.ctor) {
             case 'Edit':
               return _str('Edit');
             case 'Simulation':
               return _str('Simulation');
-          }_E.Case('Line 158, Column 18') }();
-          return A2(beside, layers(_L.Cons(drawnGraph_112,_L.Cons(plainText(_L.append(_str('Mode: '),modeText_113)),_L.Nil))), info_111);}();
-    }_E.Case('Line 150, Column 3') }();};
-  var step_28 = F5(function(render_120, timeDelta_121, mouseDown_122, relMousePos_123, programState_124){
+          }_E.Case('Line 160, Column 18') }();
+          return A2(beside, layers(_L.Cons(drawnGraph_113,_L.Cons(plainText(_L.append(_str('Mode: '),modeText_114)),_L.Nil))), info_112);}();
+    }_E.Case('Line 152, Column 3') }();};
+  var step_28 = F5(function(render_121, timeDelta_122, mouseDown_123, relMousePos_124, programState_125){
     return function(){
-      var hoverNodes_125 = A2(Gen.nodeAt, programState_124.graph, relMousePos_123);
-      return (render_120?{ctor:"Tuple2", _0:{
+      var hoverNodes_126 = A2(Gen.nodeAt, programState_125.graph, relMousePos_124);
+      return (render_121?{ctor:"Tuple2", _0:{
         _:{
         },
-        graph:A2(Ph.physicsStep, timeDelta_121, programState_124.graph),
-        mode:Simulation_7}, _1:hoverNodes_125}:A4(editGraph_17, mouseDown_122, relMousePos_123, hoverNodes_125, programState_124));}();});
+        graph:A2(Ph.physicsStep, timeDelta_122, programState_125.graph),
+        mode:Simulation_7}, _1:hoverNodes_126}:A4(editGraph_17, mouseDown_123, relMousePos_124, hoverNodes_126, programState_125));}();});
   var fr_10 = 30;
   var cs_12 = Gen.cs;
   var cc_13 = A2(clamp, 0, cs_12);
@@ -963,13 +964,13 @@ Elm.Main = function(elm){
     },
     id:7,
     label:_str('September')},_L.Nil)))))))});
-  var programState_33 = A3(foldp, function(transformFun_126){
-    return function(_0_127){
+  var programState_33 = A3(foldp, function(transformFun_127){
+    return function(_0_128){
       return function(){ 
-      switch (_0_127.ctor) {
+      switch (_0_128.ctor) {
         case 'Tuple2':
-          return transformFun_126(_0_127._0);
-      }_E.Case('Line 214, Column 50') }();};}, {ctor:"Tuple2", _0:{
+          return transformFun_127(_0_128._0);
+      }_E.Case('Line 216, Column 50') }();};}, {ctor:"Tuple2", _0:{
     _:{
     },
     graph:g3_32,
