@@ -1,5 +1,544 @@
 <!DOCTYPE HTML>
-<html><head><meta charset="UTF-8"><title>Main</title><script type="text/javascript" src="/home/jeff/.cabal/share/Elm-0.8.0.3/elm-runtime.js"></script><script type="text/javascript">
+<html><head><meta charset="UTF-8"><title>Main</title><script type="text/javascript" src="./elm-runtime.js"></script><script type="text/javascript">
+Elm.Point2D = function(elm){
+  var N = Elm.Native, _N = N.Utils(elm), _L = N.List(elm), _E = N.Error(elm), _str = N.JavaScript(elm).toString;
+  var $op = {};
+  var _ = Elm.Text(elm); var Text = _; var hiding={link:1, color:1, height:1}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Prelude(elm); var Prelude = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Signal(elm); var Signal = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.List(elm); var List = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Maybe(elm); var Maybe = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Time(elm); var Time = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Graphics.Element(elm); var Graphics = Graphics||{};Graphics.Element = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Color(elm); var Color = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Graphics.Collage(elm); var Graphics = Graphics||{};Graphics.Collage = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var Point2D_0 = F2(function(x_24, y_25){
+    return {
+      _:{
+      },
+      x:x_24,
+      y:y_25};});
+  var point2D_1 = F2(function(x_26, y_27){
+    return {
+      _:{
+      },
+      x:x_26,
+      y:y_27};});
+  var cartesian_2 = function(_36000_28){
+    return function(){ 
+    switch (_36000_28.ctor) {
+      case 'Tuple2':
+        return {
+          _:{
+          },
+          x:_36000_28._0,
+          y:_36000_28._1};
+    }_E.Case('Line 36, Column 22') }();};
+  var polar_3 = function(_39000_31){
+    return function(){ 
+    switch (_39000_31.ctor) {
+      case 'Tuple2':
+        return {
+          _:{
+          },
+          x:(_39000_31._0*cos(_39000_31._1)),
+          y:(_39000_31._0*sin(_39000_31._1))};
+    }_E.Case('Line 39, Column 20') }();};
+  var toCarthesian_4 = function(_42000_34){
+    return function(){
+      var x_35 = _42000_34.x;
+      var y_36 = _42000_34.y;
+      return {ctor:"Tuple2", _0:x_35, _1:y_36};}();};
+  var toPolar_5 = function(p_37){
+    return function(){
+      var _45000_38 = breakDown_23(p_37);
+      var r_39 = function(){ 
+      switch (_45000_38.ctor) {
+        case 'Tuple2':
+          return _45000_38._0;
+      }_E.Case('Line 45, Column 25') }();
+      var u_40 = function(){ 
+      switch (_45000_38.ctor) {
+        case 'Tuple2':
+          return _45000_38._1;
+      }_E.Case('Line 45, Column 25') }();
+      return {ctor:"Tuple2", _0:r_39, _1:A2(atan2, u_40.x, u_40.y)};}();};
+  var map_7 = F2(function(f_45, _57000_46){
+    return function(){
+      var x_47 = _57000_46.x;
+      var y_48 = _57000_46.y;
+      return {
+        _:{
+        },
+        x:f_45(x_47),
+        y:f_45(y_48)};}();});
+  var fold_8 = F2(function(f_49, _61000_50){
+    return function(){
+      var x_51 = _61000_50.x;
+      var y_52 = _61000_50.y;
+      return A2(f_49, x_51, y_52);}();});
+  var zipWith_9 = F3(function(f_53, a_54, b_55){
+    return {
+      _:{
+      },
+      x:A2(f_53, a_54.x, b_55.x),
+      y:A2(f_53, a_54.y, b_55.y)};});
+  var pls_14 = F2(function(p_64, s_65){
+    return A2(e_pls_10, p_64, from1D_20(s_65));});
+  var min_15 = F2(function(p_66, s_67){
+    return A2(e_min_11, p_66, from1D_20(s_67));});
+  var mul_16 = F2(function(p_68, s_69){
+    return A2(e_mul_12, p_68, from1D_20(s_69));});
+  var div_17 = F2(function(p_70, s_71){
+    return A2(e_div_13, p_70, from1D_20(s_71));});
+  var dot_18 = F2(function(a_72, b_73){
+    return A2(fold_8, function(a_74){
+      return function(b_75){
+        return (a_74+b_75);};}, A2(e_mul_12, a_72, b_73));});
+  var magn_19 = function(p_76){
+    return sqrt(A2(dot_18, p_76, p_76));};
+  var from1D_20 = function(a_77){
+    return A2(point2D_1, a_77, a_77);};
+  var unit_22 = function(p_78){
+    return A2(unit$_21, p_78, magn_19(p_78));};
+  var breakDown_23 = function(p_79){
+    return function(){
+      var m_80 = magn_19(p_79);
+      return {ctor:"Tuple2", _0:m_80, _1:A2(unit$_21, p_79, m_80)};}();};
+  var zero_6 = from1D_20(0);
+  var e_pls_10 = zipWith_9(function(a_56){
+    return function(b_57){
+      return (a_56+b_57);};});
+  var e_min_11 = zipWith_9(function(a_58){
+    return function(b_59){
+      return (a_58-b_59);};});
+  var e_mul_12 = zipWith_9(function(a_60){
+    return function(b_61){
+      return (a_60*b_61);};});
+  var e_div_13 = zipWith_9(function(a_62){
+    return function(b_63){
+      return (a_62/b_63);};});
+  var unit$_21 = div_17;
+  elm.Native = elm.Native||{};
+  var _ = elm.Native.Point2D||{};
+  _.$op = {};
+  _.Point2D = Point2D_0;
+  _.point2D = point2D_1;
+  _.cartesian = cartesian_2;
+  _.polar = polar_3;
+  _.toCarthesian = toCarthesian_4;
+  _.toPolar = toPolar_5;
+  _.zero = zero_6;
+  _.map = map_7;
+  _.fold = fold_8;
+  _.zipWith = zipWith_9;
+  _.e_pls = e_pls_10;
+  _.e_min = e_min_11;
+  _.e_mul = e_mul_12;
+  _.e_div = e_div_13;
+  _.pls = pls_14;
+  _.min = min_15;
+  _.mul = mul_16;
+  _.div = div_17;
+  _.dot = dot_18;
+  _.magn = magn_19;
+  _.from1D = from1D_20;
+  _.unit$ = unit$_21;
+  _.unit = unit_22;
+  _.breakDown = breakDown_23
+  return elm.Point2D = _;
+  };
+Elm.General = function(elm){
+  var N = Elm.Native, _N = N.Utils(elm), _L = N.List(elm), _E = N.Error(elm), _str = N.JavaScript(elm).toString;
+  var $op = {};
+  var _ = Elm.Text(elm); var Text = _; var hiding={link:1, color:1, height:1}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Prelude(elm); var Prelude = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Signal(elm); var Signal = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.List(elm); var List = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Maybe(elm); var Maybe = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Time(elm); var Time = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Graphics.Element(elm); var Graphics = Graphics||{};Graphics.Element = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Color(elm); var Color = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Graphics.Collage(elm); var Graphics = Graphics||{};Graphics.Collage = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var L = Elm.List(elm);
+  var D = Elm.Dict(elm);
+  var S = Elm.Set(elm);
+  var M = Elm.Maybe(elm);
+  var P = Elm.Point2D(elm);
+  var Point2D_0 = F2(function(x_19, y_20){
+    return {
+      _:{
+      },
+      x:x_19,
+      y:y_20};});
+  var TGFNode_1 = F2(function(id_21, label_22){
+    return {
+      _:{
+      },
+      id:id_21,
+      label:label_22};});
+  var TGFEdge_2 = F3(function(idFrom_23, idTo_24, label_25){
+    return {
+      _:{
+      },
+      idFrom:idFrom_23,
+      idTo:idTo_24,
+      label:label_25};});
+  var TGFGraph_3 = F2(function(nodes_26, edges_27){
+    return {
+      _:{
+      },
+      edges:edges_27,
+      nodes:nodes_26};});
+  var Node_4 = F6(function(nid_28, label_29, pos_30, vel_31, edges_32, bEdges_33){
+    return {
+      _:{
+      },
+      bEdges:bEdges_33,
+      edges:edges_32,
+      label:label_29,
+      nid:nid_28,
+      pos:pos_30,
+      vel:vel_31};});
+  var Edge_5 = F4(function(eid_34, idFrom_35, idTo_36, label_37){
+    return {
+      _:{
+      },
+      eid:eid_34,
+      idFrom:idFrom_35,
+      idTo:idTo_36,
+      label:label_37};});
+  var Graph_6 = F2(function(nodes_38, edges_39){
+    return {
+      _:{
+      },
+      edges:edges_39,
+      nodes:nodes_38};});
+  var sign_9 = function(num_40){
+    return (_N.eq(num_40,0)?1:(num_40/abs(num_40)));};
+  var sp_10 = F2(function(num_41, pow_42){
+    return (_N.eq(pow_42,0)?sign_9(num_41):(num_41*abs(Math.pow(num_41,(pow_42-1)))));});
+  var ss_11 = function(num_43){
+    return (num_43*abs(num_43));};
+  var neg_14 = function(n_44){
+    return (0-n_44);};
+  var toggle_15 = F2(function(start_45, input_46){
+    return A2(lift,fst,A3(foldp, function(inputIsTrue_47){
+      return function(_0_48){
+        return function(){ 
+        switch (_0_48.ctor) {
+          case 'Tuple2':
+            return {ctor:"Tuple2", _0:((not(_0_48._1)&&inputIsTrue_47)?not(_0_48._0):_0_48._0), _1:inputIsTrue_47};
+        }_E.Case('Line 76, Column 4') }();};}, {ctor:"Tuple2", _0:start_45, _1:false}, input_46));});
+  var createGraph_16 = function(g_51){
+    return function(){
+      var gridPos_54 = F2(function(s_61, i_62){
+        return function(){
+          var space_64 = function(p_65){
+            return A2(P.mul, p_65, s_61);};
+          var gridPoint_63 = A2(P.point2D, A2(mod, i_62, gridSize_53), A2(div, i_62, gridSize_53));
+          return space_64(gridPoint_63);}();});
+      var tgfn2n_55 = function(n_66){
+        return {ctor:"Tuple2", _0:n_66.id, _1:{
+          _:{
+          },
+          bEdges:S.fromList(A2(L.map, fst, A2(L.filter, function(_0_69){
+          return function(){ 
+          switch (_0_69.ctor) {
+            case 'Tuple2':
+              return _N.eq(_0_69._1.idTo,n_66.id);
+          }_E.Case('Line 97, Column 81') }();}, edges$_52))),
+          edges:S.fromList(A2(L.map, fst, A2(L.filter, function(_0_67){
+          return function(){ 
+          switch (_0_67.ctor) {
+            case 'Tuple2':
+              return _N.eq(_0_67._1.idFrom,n_66.id);
+          }_E.Case('Line 96, Column 81') }();}, edges$_52))),
+          label:n_66.label,
+          nid:n_66.id,
+          pos:A2(gridPos_54, (4*nodeRadius_7), n_66.id),
+          vel:P.from1D(0)}};};
+      var edges$_52 = A2(L.map, function(_0_58){
+        return function(){ 
+        switch (_0_58.ctor) {
+          case 'Tuple2':
+            return {ctor:"Tuple2", _0:_0_58._0, _1:_N.insert('eid', _0_58._0, _0_58._1)};
+        }_E.Case('Line 82, Column 32') }();}, A2(L.zip, _L.range(1,length(g_51.edges)), g_51.edges));
+      var gridSize_53 = ceiling(sqrt(toFloat(length(g_51.nodes))));
+      var newNodes_56 = D.fromList(A2(L.map, tgfn2n_55, g_51.nodes));
+      var newEdges_57 = D.fromList(edges$_52);
+      return {
+        _:{
+        },
+        edges:newEdges_57,
+        nodes:newNodes_56};}();};
+  var nodeAt_17 = F2(function(g_71, mpos_72){
+    return function(){
+      var overlap_73 = function(n_74){
+        return function(){
+          var dist_75 = P.magn(A2(P.e_min, n_74.pos, mpos_72));
+          return (_N.cmp(dist_75,nodeRadius_7).ctor==='LT');}();};
+      return A2(L.filter, overlap_73, D.values(g_71.nodes));}();});
+  var positionDelta_18 = F2(function(from_76, to_77){
+    return A2(P.e_min, to_77.pos, from_76.pos);});
+  var nodeRadius_7 = 3;
+  var cs_8 = 500;
+  var ff_12 = 1000000;
+  var small_value_13 = ((1/ff_12)/ff_12);
+  elm.Native = elm.Native||{};
+  var _ = elm.Native.General||{};
+  _.$op = {};
+  _.Point2D = Point2D_0;
+  _.TGFNode = TGFNode_1;
+  _.TGFEdge = TGFEdge_2;
+  _.TGFGraph = TGFGraph_3;
+  _.Node = Node_4;
+  _.Edge = Edge_5;
+  _.Graph = Graph_6;
+  _.nodeRadius = nodeRadius_7;
+  _.cs = cs_8;
+  _.sign = sign_9;
+  _.sp = sp_10;
+  _.ss = ss_11;
+  _.ff = ff_12;
+  _.small_value = small_value_13;
+  _.neg = neg_14;
+  _.toggle = toggle_15;
+  _.createGraph = createGraph_16;
+  _.nodeAt = nodeAt_17;
+  _.positionDelta = positionDelta_18
+  return elm.General = _;
+  };
+Elm.Physics = function(elm){
+  var N = Elm.Native, _N = N.Utils(elm), _L = N.List(elm), _E = N.Error(elm), _str = N.JavaScript(elm).toString;
+  var $op = {};
+  var _ = Elm.Text(elm); var Text = _; var hiding={link:1, color:1, height:1}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Prelude(elm); var Prelude = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Signal(elm); var Signal = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.List(elm); var List = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Maybe(elm); var Maybe = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Time(elm); var Time = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Graphics.Element(elm); var Graphics = Graphics||{};Graphics.Element = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Color(elm); var Color = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var _ = Elm.Graphics.Collage(elm); var Graphics = Graphics||{};Graphics.Collage = _; var hiding={}; for(var k in _){if(k in hiding)continue;eval('var '+k+'=_["'+k+'"]')}
+  var D = Elm.Dict(elm);
+  var S = Elm.Set(elm);
+  var P = Elm.Point2D(elm);
+  var Gen = Elm.General(elm);
+  var Point2D_0 = F2(function(x_17, y_18){
+    return {
+      _:{
+      },
+      x:x_17,
+      y:y_18};});
+  var Node_1 = F6(function(nid_19, label_20, pos_21, vel_22, edges_23, bEdges_24){
+    return {
+      _:{
+      },
+      bEdges:bEdges_24,
+      edges:edges_23,
+      label:label_20,
+      nid:nid_19,
+      pos:pos_21,
+      vel:vel_22};});
+  var Edge_2 = F4(function(eid_25, idFrom_26, idTo_27, label_28){
+    return {
+      _:{
+      },
+      eid:eid_25,
+      idFrom:idFrom_26,
+      idTo:idTo_27,
+      label:label_28};});
+  var Graph_3 = F2(function(nodes_29, edges_30){
+    return {
+      _:{
+      },
+      edges:edges_30,
+      nodes:nodes_29};});
+  var repulsion_8 = F2(function(g_31, n_32){
+    return function(){
+      var r_33 = F3(function(__34, cn_35, f_36){
+        return (_N.eq(cn_35.nid,n_32.nid)?f_36:function(){
+          var d_37 = A2(Gen.positionDelta, n_32, cn_35);
+          var _62000_38 = P.breakDown(d_37);
+          var l_39 = function(){ 
+          switch (_62000_38.ctor) {
+            case 'Tuple2':
+              return _62000_38._0;
+          }_E.Case('Line 62, Column 21') }();
+          var u_40 = function(){ 
+          switch (_62000_38.ctor) {
+            case 'Tuple2':
+              return _62000_38._1;
+          }_E.Case('Line 62, Column 21') }();
+          var f$_41 = (0-(fc_5.r/Math.pow(l_39,2)));
+          return A2(P.e_pls, f_36, A2(P.mul, u_40, f$_41));}());});
+      return A3(D.foldl, r_33, P.zero, g_31.nodes);}();});
+  var nodeStep_9 = F2(function(delta_46, g_47){
+    return function(){
+      var appRep_49 = function(n_50){
+        return function(){
+          var appRep$_51 = function(f_52){
+            return function(){
+              var _72000_53 = P.breakDown(f_52);
+              var l_54 = function(){ 
+              switch (_72000_53.ctor) {
+                case 'Tuple2':
+                  return _72000_53._0;
+              }_E.Case('Line 72, Column 23') }();
+              var u_55 = function(){ 
+              switch (_72000_53.ctor) {
+                case 'Tuple2':
+                  return _72000_53._1;
+              }_E.Case('Line 72, Column 23') }();
+              var vl_56 = ((l_54*delta_46)/nc_4.m);
+              var v_57 = A2(P.mul, u_55, cms_7(vl_56));
+              return _N.replace([['vel',A2(P.e_pls, n_50.vel, v_57)]], n_50);}();};
+          return A3(maybe, n_50, appRep$_51, A2(D.lookup, n_50.nid, mrf_48));}();};
+      var mrf_48 = A2(D.map, repulsion_8(g_47), g_47.nodes);
+      return _N.replace([['nodes',A2(D.map, appRep_49, g_47.nodes)]], g_47);}();});
+  var attraction_10 = F2(function(g_62, n_63){
+    return function(){
+      var a_64 = F3(function(__65, cn_66, f_67){
+        return (_N.eq(cn_66.nid,n_63.nid)?f_67:function(){
+          var ei_68 = A2(S.union, A2(S.intersect, n_63.edges, cn_66.bEdges), A2(S.intersect, n_63.bEdges, cn_66.edges));
+          return (_N.eq(S.toList(ei_68),_L.Nil)?f_67:function(){
+            var d_69 = A2(Gen.positionDelta, n_63, cn_66);
+            var _91000_70 = P.breakDown(d_69);
+            var l_71 = function(){ 
+            switch (_91000_70.ctor) {
+              case 'Tuple2':
+                return _91000_70._0;
+            }_E.Case('Line 91, Column 25') }();
+            var u_72 = function(){ 
+            switch (_91000_70.ctor) {
+              case 'Tuple2':
+                return _91000_70._1;
+            }_E.Case('Line 91, Column 25') }();
+            var f$_73 = (fc_5.sc*(l_71-fc_5.el));
+            return A2(P.e_pls, f_67, A2(P.mul, u_72, f$_73));}());}());});
+      return A3(D.foldl, a_64, P.zero, g_62.nodes);}();});
+  var edgeStep_11 = F2(function(delta_78, g_79){
+    return function(){
+      var appAttr_81 = function(n_82){
+        return function(){
+          var appAttr$_83 = function(f_84){
+            return function(){
+              var _101000_85 = P.breakDown(f_84);
+              var l_86 = function(){ 
+              switch (_101000_85.ctor) {
+                case 'Tuple2':
+                  return _101000_85._0;
+              }_E.Case('Line 101, Column 23') }();
+              var u_87 = function(){ 
+              switch (_101000_85.ctor) {
+                case 'Tuple2':
+                  return _101000_85._1;
+              }_E.Case('Line 101, Column 23') }();
+              var vl_88 = ((l_86*delta_78)/nc_4.m);
+              var v_89 = A2(P.mul, u_87, cms_7(vl_88));
+              return _N.replace([['vel',A2(P.e_pls, n_82.vel, v_89)]], n_82);}();};
+          return A3(maybe, n_82, appAttr$_83, A2(D.lookup, n_82.nid, maf_80));}();};
+      var maf_80 = A2(D.map, attraction_10(g_79), g_79.nodes);
+      return _N.replace([['nodes',A2(D.map, appAttr_81, g_79.nodes)]], g_79);}();});
+  var drag_12 = F2(function(__94, n_95){
+    return function(){
+      var _110000_96 = P.breakDown(n_95.vel);
+      var l_97 = function(){ 
+      switch (_110000_96.ctor) {
+        case 'Tuple2':
+          return _110000_96._0;
+      }_E.Case('Line 110, Column 15') }();
+      var u_98 = function(){ 
+      switch (_110000_96.ctor) {
+        case 'Tuple2':
+          return _110000_96._1;
+      }_E.Case('Line 110, Column 15') }();
+      var rho_99 = 998.2071;
+      var dF_100 = (1/3000);
+      var dens_101 = (dF_100*rho_99);
+      var coeff_102 = 0.47;
+      var area_103 = (pi*Math.pow(nc_4.r,2));
+      var f_104 = (0-((((Math.pow(l_97,2)*dens_101)*coeff_102)*area_103)/2));
+      return A2(P.mul, u_98, f_104);}();});
+  var dragStep_13 = F2(function(delta_109, g_110){
+    return function(){
+      var appDrag_112 = function(n_113){
+        return function(){
+          var appDrag$_114 = function(f_115){
+            return function(){
+              var _127000_116 = P.breakDown(f_115);
+              var l_117 = function(){ 
+              switch (_127000_116.ctor) {
+                case 'Tuple2':
+                  return _127000_116._0;
+              }_E.Case('Line 127, Column 23') }();
+              var u_118 = function(){ 
+              switch (_127000_116.ctor) {
+                case 'Tuple2':
+                  return _127000_116._1;
+              }_E.Case('Line 127, Column 23') }();
+              var vl_119 = ((l_117*delta_109)/nc_4.m);
+              var vl$_120 = A3(clamp, 0, P.magn(n_113.vel), vl_119);
+              var v_121 = A2(P.mul, u_118, vl$_120);
+              return _N.replace([['vel',A2(P.e_pls, n_113.vel, v_121)]], n_113);}();};
+          return A3(maybe, n_113, appDrag$_114, A2(D.lookup, n_113.nid, mdf_111));}();};
+      var mdf_111 = A2(D.map, drag_12(g_110), g_110.nodes);
+      return _N.replace([['nodes',A2(D.map, appDrag_112, g_110.nodes)]], g_110);}();});
+  var velocityStep_14 = F2(function(delta_126, g_127){
+    return function(){
+      var vel_128 = function(n_130){
+        return _N.replace([['pos',A2(vel2_129, n_130.pos, n_130.vel)]], n_130);};
+      var vel2_129 = F2(function(pos_131, vel_132){
+        return A2(P.e_pls, pos_131, A2(P.mul, vel_132, delta_126));});
+      return _N.replace([['nodes',A2(D.map, vel_128, g_127.nodes)]], g_127);}();});
+  var frictionStep_15 = F2(function(delta_133, g_134){
+    return function(){
+      var fric_135 = function(n_138){
+        return _N.replace([['vel',fric2_136(n_138.vel)]], n_138);};
+      var fric2_136 = function(vel_139){
+        return A2(P.map, fric3_137, vel_139);};
+      var fric3_137 = function(v_140){
+        return (toFloat(round((Gen.ff*v_140)))/Gen.ff);};
+      return _N.replace([['nodes',A2(D.map, fric_135, g_134.nodes)]], g_134);}();});
+  var physicsStep_16 = function(d_141){
+    return (_N.eq(d_141,0)?id:function(x){
+      return A2(velocityStep_14, d_141, A2(dragStep_13, d_141, A2(edgeStep_11, d_141, A2(nodeStep_9, d_141, x))));});};
+  var nc_4 = {
+    _:{
+    },
+    m:10,
+    r:Gen.nodeRadius};
+  var fc_5 = {
+    _:{
+    },
+    el:60,
+    r:1000000,
+    sc:50};
+  var ms_6 = (Gen.cs/4);
+  var cms_7 = A2(clamp, (0-ms_6), ms_6);
+  elm.Native = elm.Native||{};
+  var _ = elm.Native.Physics||{};
+  _.$op = {};
+  _.Point2D = Point2D_0;
+  _.Node = Node_1;
+  _.Edge = Edge_2;
+  _.Graph = Graph_3;
+  _.nc = nc_4;
+  _.fc = fc_5;
+  _.ms = ms_6;
+  _.cms = cms_7;
+  _.repulsion = repulsion_8;
+  _.nodeStep = nodeStep_9;
+  _.attraction = attraction_10;
+  _.edgeStep = edgeStep_11;
+  _.drag = drag_12;
+  _.dragStep = dragStep_13;
+  _.velocityStep = velocityStep_14;
+  _.frictionStep = frictionStep_15;
+  _.physicsStep = physicsStep_16
+  return elm.Physics = _;
+  };
 Elm.Main = function(elm){
   var N = Elm.Native, _N = N.Utils(elm), _L = N.List(elm), _E = N.Error(elm), _str = N.JavaScript(elm).toString;
   var $op = {};
@@ -90,17 +629,17 @@ Elm.Main = function(elm){
   var editGraph_17 = F4(function(mouseDown_61, mouseRelPos_62, hoverNodes_63, programState_64){
     return function(){
       var noNodeDrag_65 = function(){
-        var _90000_66 = headToMaybeAndList_16(hoverNodes_63);
+        var _91000_66 = headToMaybeAndList_16(hoverNodes_63);
         var mSelectedNode_67 = function(){ 
-        switch (_90000_66.ctor) {
+        switch (_91000_66.ctor) {
           case 'Tuple2':
-            return _90000_66._0;
-        }_E.Case('Line 90, Column 55') }();
+            return _91000_66._0;
+        }_E.Case('Line 91, Column 55') }();
         var lSelectedNode_68 = function(){ 
-        switch (_90000_66.ctor) {
+        switch (_91000_66.ctor) {
           case 'Tuple2':
-            return _90000_66._1;
-        }_E.Case('Line 90, Column 55') }();
+            return _91000_66._1;
+        }_E.Case('Line 91, Column 55') }();
         return {ctor:"Tuple2", _0:_N.replace([['mode',Edit_8(mSelectedNode_67)]], programState_64), _1:lSelectedNode_68};}();
       return function(){ 
       var case6 = programState_64.mode;
@@ -126,7 +665,7 @@ Elm.Main = function(elm){
           }break;
         case 'Simulation':
           return noNodeDrag_65;
-      }_E.Case('Line 92, Column 6') }();}();});
+      }_E.Case('Line 93, Column 6') }();}();});
   var drawGraph_18 = F3(function(g_81, ncolor_82, ecolor_83){
     return _L.append(A2(drawEdges_22, g_81, ecolor_83),A2(drawNodes_19, g_81, ncolor_82));});
   var drawNodes_19 = F2(function(g_84, ncolor_85){
@@ -161,32 +700,32 @@ Elm.Main = function(elm){
         return A2(P.min, p_104, ccenter_14);};
       var negateY_103 = P.e_mul(A2(P.point2D, 1, -1));
       return negateY_103(fromCenter_102(posV_101));}();};
-  var layout_25 = function(_160000_105){
+  var layout_25 = function(_161000_105){
     return function(){ 
-    switch (_160000_105.ctor) {
+    switch (_161000_105.ctor) {
       case 'Tuple2':
         return function(){
           var ncolor_109 = function(nid_116){
             return (A2(any, function(hn_117){
-              return _N.eq(nid_116,hn_117.nid);}, _160000_105._1)?colors_15.node.hover:colors_15.node.normal);};
+              return _N.eq(nid_116,hn_117.nid);}, _161000_105._1)?colors_15.node.hover:colors_15.node.normal);};
           var ecolor_110 = function(eid_118){
             return (A2(S.member, eid_118, hoverNodeEdges_108)?colors_15.edge.hover:colors_15.edge.normal);};
           var hoverNodeEdges_108 = A3(L.foldl, function(n_114){
             return function(acc_115){
-              return A2(S.union, n_114.edges, A2(S.union, n_114.bEdges, acc_115));};}, S.empty, _160000_105._1);
+              return A2(S.union, n_114.edges, A2(S.union, n_114.bEdges, acc_115));};}, S.empty, _161000_105._1);
           var info_111 = A2(flow, down, A2(L.map, function(x){
-            return plainText(x.label);}, _160000_105._1));
-          var drawnGraph_112 = layoutCollage_24(A3(drawGraph_18, _160000_105._0.graph, ncolor_109, ecolor_110));
+            return plainText(x.label);}, _161000_105._1));
+          var drawnGraph_112 = layoutCollage_24(A3(drawGraph_18, _161000_105._0.graph, ncolor_109, ecolor_110));
           var modeText_113 = function(){ 
-          var case17 = _160000_105._0.mode;
+          var case17 = _161000_105._0.mode;
           switch (case17.ctor) {
             case 'Edit':
               return _str('Edit');
             case 'Simulation':
               return _str('Simulation');
-          }_E.Case('Line 157, Column 18') }();
+          }_E.Case('Line 158, Column 18') }();
           return A2(beside, layers(_L.Cons(drawnGraph_112,_L.Cons(plainText(_L.append(_str('Mode: '),modeText_113)),_L.Nil))), info_111);}();
-    }_E.Case('Line 149, Column 3') }();};
+    }_E.Case('Line 150, Column 3') }();};
   var step_28 = F5(function(render_120, timeDelta_121, mouseDown_122, relMousePos_123, programState_124){
     return function(){
       var hoverNodes_125 = A2(Gen.nodeAt, programState_124.graph, relMousePos_123);
@@ -430,7 +969,7 @@ Elm.Main = function(elm){
       switch (_0_127.ctor) {
         case 'Tuple2':
           return transformFun_126(_0_127._0);
-      }_E.Case('Line 213, Column 50') }();};}, {ctor:"Tuple2", _0:{
+      }_E.Case('Line 214, Column 50') }();};}, {ctor:"Tuple2", _0:{
     _:{
     },
     graph:g3_32,
