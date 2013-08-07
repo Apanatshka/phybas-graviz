@@ -27,20 +27,19 @@ Portability :  portable
 module General where
 
 import List    as L
+import Dict (Dict)
 import Dict    as D
+import Set (Set)
 import Set     as S
 import Maybe   as M
+import Point2D (Point2D)
 import Point2D as P
+import TGF (TGFGraph)
 
-type Point2D  = {x : Float, y : Float}
 type Vector2D = Point2D
 
 type NodeID = Int
 type EdgeID = Int
-
-type TGFNode  = { id : NodeID, label : String }
-type TGFEdge  = { idFrom : NodeID, idTo : NodeID, label : String }
-type TGFGraph = { nodes : [TGFNode], edges : [TGFEdge] }
 
 type Node  = { nid : NodeID, label : String, pos : Point2D, vel : Vector2D, edges : Set EdgeID, bEdges : Set EdgeID }
 type Edge  = { eid : EdgeID, idFrom : NodeID, idTo : NodeID, label : String }
@@ -84,7 +83,7 @@ createGraph g = let
     -- code to set up initial positions of nodes
     gridSize  = ceiling <| sqrt <| toFloat <| length g.nodes
     gridPos s i =
-      let gridPoint = P.point2D (i `mod` gridSize) (i `div` gridSize)
+      let gridPoint = P.point2D (toFloat <| i `mod` gridSize) (toFloat <| i `div` gridSize)
           space p   = P.mul p s
       in space <| gridPoint
 

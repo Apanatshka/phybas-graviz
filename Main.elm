@@ -23,43 +23,28 @@ Compatibility :  The Elm Compiler 0.8.0.3
  | You should have received a copy of the GNU General Public License      |
  | along with this program.  If not, see <http://www.gnu.org/licenses/>.  |
  | ---------------------------------------------------------------------- |
-
-References:
-
-[1] Wolfram|Alpha, URL: https://www.wolframalpha.com/input/?i=density+of+polyester&a=*DPClash.MaterialEC.polyester-_**Polyester.TS--
-[2] Wikipedia, URL: https://en.wikipedia.org/wiki/Water_(molecule)#Density_of_water_and_ice
-[3] Wikipedia, URL: https://en.wikipedia.org/wiki/Drag_coefficient
-[4] Peter Eades. A heuristic for graph drawing. Congressus Numerantium, 42:149–160, 1984. (unchecked reference -don't have access to the original paper- used quote from http://cs.brown.edu/~rt/gdhandbook/chapters/force-directed.pdf)
 -}
 
 module Main where
 
 import List      as L
+import Dict (Dict)
 import Dict      as D
+import Set (Set)
 import Set       as S
 import Maybe     as M
 --import Graphics  as G
 import Color     as C
 import Automaton as A
+import Point2D (Point2D)
 import Point2D   as P
+import General (Vector2D, NodeID, EdgeID, Node, Edge, Graph)
 import General   as Gen
 import Physics   as Ph
+import TGF (TGFNode, TGFEdge, TGFGraph)
+import TGF
 import Keyboard
 import Mouse
-
-type Point2D  = {x : Float, y : Float}
-type Vector2D = Point2D
-
-type NodeID = Int
-type EdgeID = Int
-
-type TGFNode  = { id : NodeID, label : String }
-type TGFEdge  = { idFrom : NodeID, idTo : NodeID, label : String }
-type TGFGraph = { nodes : [TGFNode], edges : [TGFEdge] }
-
-type Node  = { nid : NodeID, label : String, pos : Point2D, vel : Vector2D, edges : Set EdgeID, bEdges : Set EdgeID }
-type Edge  = { eid : EdgeID, idFrom : NodeID, idTo : NodeID, label : String }
-type Graph = { nodes : Dict NodeID Node, edges : Dict EdgeID Edge }
 
 data Mode = Simulation | Edit (Maybe Node)
 type ProgramState = { graph : Graph, mode : Mode }
@@ -82,21 +67,21 @@ colors = { node = { normal = C.blue, hover = C.cyan    }
          }
 
 headToMaybeAndList : [a] -> (Maybe a, [a])
-headToMaybeAndList l = let
-    headOrNil = take 1 l
-  in if headOrNil == [] then (Nothing, []) else (Just (head headOrNil), headOrNil)
+headToMaybeAndList l = case l of
+  h :: t -> (Just h, [h])
+  []     -> (Nothing, [])
 
-editGraph : Bool -> Point2D -> [Nodes] -> ProgramState -> (ProgramState, [Node])
+editGraph : Bool -> Point2D -> [Node] -> ProgramState -> (ProgramState, [Node])
 editGraph mouseDown mouseRelPos hoverNodes programState = let
     noNodeDrag = let
         (mSelectedNode, lSelectedNode) = headToMaybeAndList hoverNodes
         newMode = Edit (if mouseDown then mSelectedNode else Nothing)
-      in ({ programState | mode <- newMode }, lSelectedNode)
+      in ({ graph = programState.graph, mode = newMode }, lSelectedNode)
   in case programState.mode of
     Simulation           -> noNodeDrag
     Edit Nothing         -> noNodeDrag
     Edit (Just dragNode) -> let
-        hovernode = [dragNode]
+        hoverNode = [dragNode]
 
         -- decide if still dragging
         newMode = Edit (if mouseDown then Just dragNode else Nothing)
@@ -107,7 +92,7 @@ editGraph mouseDown mouseRelPos hoverNodes programState = let
         newGraph = { g | nodes <- newNodes }
 
         newProgramState = { graph = newGraph, mode = newMode }
-      in (newProgramState, hovernode)
+      in (newProgramState, hoverNode)
 
 drawGraph : Graph -> (NodeID -> Color) -> (EdgeID -> Color) -> [Form]
 drawGraph g ncolor ecolor = (drawEdges g ecolor) ++ (drawNodes g ncolor)
@@ -126,7 +111,7 @@ drawNode c p = circle Gen.nodeRadius
 
 -- draw an edge with color c from p1 to p2
 drawEdge : Color -> Point2D -> Point2D -> Form
-drawEdge c p1 p2 = segment (p1.x, Gen.neg p1.y) (p2.x, Gen.neg p2.y) -- IMPORTANT: Gen.neg added to counter runtime bug, this is a temporary fix!
+drawEdge c p1 p2 = segment (p1.x, p1.y) (p2.x, p2.y)
                    |> traced (solid c)
 
 drawEdges : Graph -> (EdgeID -> Color) -> [Form]
@@ -140,7 +125,7 @@ drawEdges g ecolor = let
 
 relativeMousePosition : Point2D -> Point2D
 relativeMousePosition posV = let
-    fromCenter p = P.min p ccenter
+    fromCenter p = P.min p (toFloat ccenter)
     negateY = P.e_mul <| P.point2D 1 (0-1)
   in negateY <| fromCenter <| posV
 
@@ -177,11 +162,11 @@ step render timeDelta mouseDown relMousePos programState = let
     else editGraph mouseDown relMousePos hoverNodes programState
 
 transform : Signal (ProgramState -> (ProgramState, [Node]))
-transform = step <~ simulate ~ seconds ~ Mouse.isDown ~ (relativeMousePosition . P.cartesian <~ Mouse.position)
+transform = step <~ simulate ~ seconds ~ Mouse.isDown ~ (relativeMousePosition . P.cartesian . (\(a,b) -> (toFloat a, toFloat b)) <~ Mouse.position)
 
 
-g1 : Graph
-g1 = {nodes = D.fromList [ (1,{nid=1,label="1",pos={x=15,y=15},vel={x=0,y=0},edges=S.fromList [1],bEdges=S.fromList [2]})
+test1 : Graph
+test1 = {nodes = D.fromList [ (1,{nid=1,label="1",pos={x=15,y=15},vel={x=0,y=0},edges=S.fromList [1],bEdges=S.fromList [2]})
                          , (2,{nid=2,label="2",pos={x=35,y= 5},vel={x=0,y=0},edges=S.fromList [3],bEdges=S.fromList [1]})
                          , (3,{nid=3,label="3",pos={x=15,y=15},vel={x=0,y=0},edges=S.fromList [2],bEdges=S.fromList [3]})
                          ], edges = D.fromList [ (1,{eid=1,idFrom=1,idTo=2,label="1"})
@@ -189,31 +174,32 @@ g1 = {nodes = D.fromList [ (1,{nid=1,label="1",pos={x=15,y=15},vel={x=0,y=0},edg
                                                , (3,{eid=3,idFrom=2,idTo=3,label="3"})
                                                ]}
 
-g2 : Graph
-g2 = Gen.createGraph { nodes = [{id=1,label="1"},{id=2,label="2"},{id=3,label="3"},{id=4,label="4"}], edges = [{idFrom=1,idTo=2,label="1"},{idFrom=3,idTo=1,label="2"},{idFrom=2,idTo=3,label="3"},{idFrom=1,idTo=4,label="4"},{idFrom=2,idTo=4,label="5"},{idFrom=4,idTo=3,label="6"}] }
+test2 : Graph
+test2 = Gen.createGraph { nodes = [{id=1,label="1"},{id=2,label="2"},{id=3,label="3"},{id=4,label="4"}], edges = [{idFrom=1,idTo=2,label="1"},{idFrom=3,idTo=1,label="2"},{idFrom=2,idTo=3,label="3"},{idFrom=1,idTo=4,label="4"},{idFrom=2,idTo=4,label="5"},{idFrom=4,idTo=3,label="6"}] }
 
 -- from: http://docs.yworks.com/yfiles/doc/developers-guide/tgf.html
-g3 : Graph
-g3 = Gen.createGraph { nodes = [ {id=1, label="January"  }
-                               , {id=2, label="March"    }
-                               , {id=3, label="April"    }
-                               , {id=4, label="May"      }
-                               , {id=5, label="December" }
-                               , {id=6, label="June"     }
-                               , {id=7, label="September"} ]
-                     , edges = [ {idFrom=1, idTo=2, label=""               }
-                               , {idFrom=3, idTo=2, label=""               }
-                               , {idFrom=4, idTo=3, label=""               }
-                               , {idFrom=5, idTo=1, label="Happy New Year!"}
-                               , {idFrom=5, idTo=3, label="April Fools Day"}
-                               , {idFrom=6, idTo=3, label=""               }
-                               , {idFrom=6, idTo=1, label=""               }
-                               , {idFrom=7, idTo=5, label=""               }
-                               , {idFrom=7, idTo=6, label=""               }
-                               , {idFrom=7, idTo=1, label=""               } ] }
+test3 : Graph
+test3 = Gen.createGraph <| TGF.fromString """1 January
+2 March
+3 April
+4 May
+5 December
+6 June
+7 September
+#
+1 2
+3 2
+4 3
+5 1 Happy New Year!
+5 3 April Fools Day
+6 3
+6 1
+7 5
+7 6
+7 1"""
 
 programState : Signal (ProgramState, [Node])
-programState = foldp (\transformFun (graph,_) -> transformFun graph) ({graph=g3,mode=Simulation}, []) transform
+programState = foldp (\transformFun (graph,_) -> transformFun graph) ({graph=test3,mode=Simulation}, []) transform
 
 main : Signal Element
 main = layout <~ programState

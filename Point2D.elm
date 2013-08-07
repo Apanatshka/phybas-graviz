@@ -38,7 +38,7 @@ cartesian (x, y) = { x = x, y = y }
 polar : (Float, Float) -> Point2D
 polar (r, phi) = { x = r * cos phi, y = r * sin phi }
 
-toCartesian : Point2D -> (Float, Float)
+toCarthesian : Point2D -> (Float, Float)
 toCarthesian {x,y} = (x,y)
 
 toPolar : Point2D -> (Float, Float)

@@ -35,35 +35,47 @@ type TGFNode  = { id : NodeID, label : String }
 type TGFEdge  = { idFrom : NodeID, idTo : NodeID, label : String }
 type TGFGraph = { nodes : [TGFNode], edges : [TGFEdge] }
 
+empty = { nodes = [], edges = [] }
+
 dropWhile : (a -> Bool) -> [a] -> [a]
 dropWhile pred list =
   case list of
-    head :: tail -> if pred head then head :: (dropWhile pred tail) else dropWhile pred tail
+    head :: tail -> if pred head then dropWhile pred tail else list
     []           -> []
 
-fromString : String -> Maybe TGFGraph
+splitOn : (a -> Bool) -> [a] -> ([a], [a])
+splitOn pred list =
+  case list of
+    head :: tail -> if pred head
+                      then ([], tail)
+                      else
+                        let (l,r) = splitOn pred tail
+                        in (head :: l, r)
+    []           -> ([], [])
+
+fromString : String -> TGFGraph
 fromString str =
   let notDigit char = not <| Char.isDigit char
       nodeFromString str =
-        let (idStr, label) = partition notDigit str
+        let (idStr, label) = splitOn notDigit str
         in case readInt idStr of
           Just id -> Just { id = id, label = label }
           Nothing -> Nothing
-      edgeFromString edge =
-        let (idStr1, rest) = partition notDigit str
-            (idStr2, label) = partition notDigit <| dropWhile notDigit rest
+      edgeFromString str =
+        let (idStr1, rest) = splitOn notDigit str
+            (idStr2, label) = splitOn notDigit <| dropWhile notDigit rest
         in case (readInt idStr1, readInt idStr2) of
           (Just idFrom, Just idTo) -> Just { idFrom = idFrom, idTo = idTo, label = label }
           _                        -> Nothing
   in
     let lines = split "\n" str
-        (nodeStrings, edgeStrings) = partition (\line -> line == "#") lines
+        (nodeStrings, edgeStrings) = splitOn ((==) "#") lines
         maybeNodes = map nodeFromString nodeStrings
         maybeEdges = map edgeFromString edgeStrings
     in
       if not <| any Maybe.isNothing maybeNodes || any Maybe.isNothing maybeEdges
-      then Just { nodes = Maybe.justs maybeNodes, edges = Maybe.justs maybeEdges }
-      else Nothing
+      then { nodes = Maybe.justs maybeNodes, edges = Maybe.justs maybeEdges }
+      else empty
 
 toString : TGFGraph -> String
 toString graph =

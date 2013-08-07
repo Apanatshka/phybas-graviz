@@ -22,24 +22,25 @@ Portability :  portable
  | You should have received a copy of the GNU General Public License      |
  | along with this program.  If not, see <http://www.gnu.org/licenses/>.  |
  | ---------------------------------------------------------------------- |
+
+References:
+
+[1] Wolfram|Alpha, URL: https://www.wolframalpha.com/input/?i=density+of+polyester&a=*DPClash.MaterialEC.polyester-_**Polyester.TS--
+[2] Wikipedia, URL: https://en.wikipedia.org/wiki/Water_(molecule)#Density_of_water_and_ice
+[3] Wikipedia, URL: https://en.wikipedia.org/wiki/Drag_coefficient
+[4] Peter Eades. A heuristic for graph drawing. Congressus Numerantium, 42:149–160, 1984. (unchecked reference -don't have access to the original paper- used quote from http://cs.brown.edu/~rt/gdhandbook/chapters/force-directed.pdf)
 -}
 
 module Physics where
 
+import Dict (Dict)
 import Dict    as D
+import Set (Set)
 import Set     as S
+import Point2D (Point2D)
 import Point2D as P
+import General (Vector2D, Node, Edge, Graph)
 import General as Gen
-
-type Point2D  = {x : Float, y : Float}
-type Vector2D = Point2D
-
-type NodeID = Int
-type EdgeID = Int
-
-type Node  = { nid : NodeID, label : String, pos : Point2D, vel : Vector2D, edges : Set EdgeID, bEdges : Set EdgeID }
-type Edge  = { eid : EdgeID, idFrom : NodeID, idTo : NodeID, label : String }
-type Graph = { nodes : Dict NodeID Node, edges : Dict EdgeID Edge }
 
 -- nodeConstants = { mass,   radius }
 nc               = { m = 10, r = Gen.nodeRadius }
