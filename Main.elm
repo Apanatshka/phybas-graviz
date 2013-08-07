@@ -7,7 +7,7 @@ License       :  GPL-3.0
 Maintainer    :  jeff.smits@gmail.com
 Stability     :  experimental
 Portability   :  portable
-Compatibility :  The Elm Compiler 0.8.0.3
+Compatibility :  The Elm Compiler (pre-)0.9
 
  | ---------------------------------------------------------------------- |
  | This program is free software: you can redistribute it and/or modify   |
@@ -76,7 +76,9 @@ editGraph mouseDown mouseRelPos hoverNodes programState = let
     noNodeDrag = let
         (mSelectedNode, lSelectedNode) = headToMaybeAndList hoverNodes
         newMode = Edit (if mouseDown then mSelectedNode else Nothing)
-      in ({ graph = programState.graph, mode = newMode }, lSelectedNode)
+        newState : ProgramState
+        newState = { programState | mode <- newMode }
+      in (newState, lSelectedNode)
   in case programState.mode of
     Simulation           -> noNodeDrag
     Edit Nothing         -> noNodeDrag
@@ -105,23 +107,19 @@ drawNodes g ncolor = let
 
 -- draw a node with color c and position p
 drawNode : Color -> Point2D -> Form
-drawNode c p = circle Gen.nodeRadius
-               |> filled c
-               |> move (p.x, p.y)
+drawNode c p = circle Gen.nodeRadius |> filled c |> move (p.x, p.y)
 
 -- draw an edge with color c from p1 to p2
 drawEdge : Color -> Point2D -> Point2D -> Form
-drawEdge c p1 p2 = segment (p1.x, p1.y) (p2.x, p2.y)
-                   |> traced (solid c)
+drawEdge c p1 p2 = segment (p1.x, p1.y) (p2.x, p2.y) |> traced (solid c)
 
 drawEdges : Graph -> (EdgeID -> Color) -> [Form]
 drawEdges g ecolor = let
-    -- edge to form
-    e2f _ e acc =
+    edge2form _ e acc =
         case (D.lookup e.idFrom g.nodes, D.lookup e.idTo g.nodes) of
             (Just n1, Just n2) -> (drawEdge (ecolor e.eid) n1.pos n2.pos) :: acc
             _                  -> acc
-  in  (D.foldl e2f [] g.edges)
+  in  (D.foldl edge2form [] g.edges)
 
 relativeMousePosition : Point2D -> Point2D
 relativeMousePosition posV = let

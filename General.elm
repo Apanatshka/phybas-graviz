@@ -65,9 +65,6 @@ ff = 1000000
 -- small_value
 small_value = 1 / ff / ff
 
--- negate a number
-neg n = 0 - n
-
 
 -- when input signal turns true, the toggle changes
 toggle : Bool -> Signal Bool -> Signal Bool
@@ -91,7 +88,7 @@ createGraph g = let
     tgfn2n n = (n.id, { nid    = n.id
                       , label  = n.label
                       , pos    = gridPos (nodeRadius*4) n.id
-                      , vel    = P.from1D 0
+                      , vel    = P.zero
                       , edges  = S.fromList <| L.map fst <| L.filter (\(_,e) -> e.idFrom == n.id) edges'
                       , bEdges = S.fromList <| L.map fst <| L.filter (\(_,e) -> e.idTo   == n.id) edges'
                       })

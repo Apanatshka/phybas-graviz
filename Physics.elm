@@ -51,7 +51,7 @@ fc                = { r = 1000000, sc = 50,                 el = 60           }
 -- maximum speed
 ms = Gen.cs/4
 -- clamp maximum speed
-cms = clamp (0-ms) ms
+cms = clamp (-ms) ms
 
 repulsion : Graph -> Node -> Vector2D
 repulsion g n =
@@ -61,7 +61,7 @@ repulsion g n =
       else
         let d = Gen.positionDelta n cn
             (l,u) = P.breakDown d
-            f' = 0 - (fc.r / l^2)
+            f' = -(fc.r / l^2)
         in P.e_pls f <| P.mul u f'
   in D.foldl r P.zero g.nodes
 
@@ -117,7 +117,7 @@ drag _ n =
       coeff = 0.47          -- dimensionless (coefficient for a circular shape [3])
       area  = pi * nc.r ^ 2 -- m^2, area
 
-      f = 0-(l^2 * dens * coeff * area / 2) -- N
+      f = -(l^2 * dens * coeff * area / 2) -- N
   in P.mul u f
 
 dragStep : Float -> Graph -> Graph
