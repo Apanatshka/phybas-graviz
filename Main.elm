@@ -7,7 +7,7 @@ License       :  GPL-3.0
 Maintainer    :  jeff.smits@gmail.com
 Stability     :  experimental
 Portability   :  portable
-Compatibility :  The Elm Compiler (pre-)0.9
+Compatibility :  The Elm Compiler (pre-)0.9 (tracking git branch master)
 
  | ---------------------------------------------------------------------- |
  | This program is free software: you can redistribute it and/or modify   |
@@ -46,7 +46,8 @@ import TGF
 import Keyboard
 import Mouse
 
-data Mode = Simulation | Edit (Maybe Node)
+data Tool = Drag (Maybe Node)
+data Mode = Simulation | Edit Tool [Node]
 type ProgramState = { graph : Graph, mode : Mode }
 
 -- frameRate : FPS
@@ -75,35 +76,33 @@ editGraph : Bool -> Point2D -> [Node] -> ProgramState -> (ProgramState, [Node])
 editGraph mouseDown mouseRelPos hoverNodes programState = let
     noNodeDrag = let
         (mSelectedNode, lSelectedNode) = headToMaybeAndList hoverNodes
-        newMode = Edit (if mouseDown then mSelectedNode else Nothing)
+        newMode = if mouseDown then Edit (Drag mSelectedNode) lSelectedNode else Edit (Drag Nothing) []
         newState : ProgramState
         newState = { programState | mode <- newMode }
       in (newState, lSelectedNode)
   in case programState.mode of
-    Simulation           -> noNodeDrag
-    Edit Nothing         -> noNodeDrag
-    Edit (Just dragNode) -> let
-        hoverNode = [dragNode]
+    Simulation                            -> noNodeDrag
+    Edit (Drag Nothing)         _         -> noNodeDrag
+    Edit (Drag (Just dragNode)) selection -> let
+        -- update selected nodes position
+        relMove = P.e_min mouseRelPos dragNode.pos
+        newSelection = L.map (\node -> { node | pos <- P.e_pls node.pos relMove }) selection
+        newGraph = L.foldl (\node graph -> { graph | nodes <- D.insert node.nid node graph.nodes }) programState.graph newSelection
+        newDragNode = { dragNode | pos <- P.e_pls dragNode.pos relMove }
 
         -- decide if still dragging
-        newMode = Edit (if mouseDown then Just dragNode else Nothing)
-        -- update drag node position
-        newDragNode = { dragNode | pos <- mouseRelPos }
-        newNodes = D.insert dragNode.nid newDragNode programState.graph.nodes
-        g = programState.graph -- compiler can't handle dots (.) in graph syntax yet :(
-        newGraph = { g | nodes <- newNodes }
+        newMode = Edit (Drag (if mouseDown then Just newDragNode else Nothing)) newSelection
 
         newProgramState = { graph = newGraph, mode = newMode }
-      in (newProgramState, hoverNode)
+      in (newProgramState, newSelection)
 
 drawGraph : Graph -> (NodeID -> Color) -> (EdgeID -> Color) -> [Form]
 drawGraph g ncolor ecolor = (drawEdges g ecolor) ++ (drawNodes g ncolor)
 
 drawNodes : Graph -> (NodeID -> Color) -> [Form]
 drawNodes g ncolor = let
-    -- node to form
-    n2f n = drawNode (ncolor n.nid) n.pos
-  in (L.map n2f <| D.values g.nodes)
+    node2form n = drawNode (ncolor n.nid) n.pos
+  in (L.map node2form <| D.values g.nodes)
 
 -- draw a node with color c and position p
 drawNode : Color -> Point2D -> Form
@@ -142,7 +141,7 @@ layout (programState, hoverNodes) =
 
       modeText = case programState.mode of
         Simulation -> "Simulation"
-        Edit _     -> "Edit"
+        Edit _ _   -> "Edit"
   in layers [drawnGraph, plainText <| "Mode: " ++ modeText] `beside` info
 
 
