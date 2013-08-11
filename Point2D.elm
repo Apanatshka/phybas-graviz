@@ -26,22 +26,18 @@ Portability :  portable
 
 module Point2D where
 
-type Point2D = {x : Float, y : Float}
+type Point2D = {x : number, y : number}
 
--- old constructor
-point2D : Float -> Float -> Point2D
-point2D x y = { x = x, y = y }
-
-cartesian : (Float, Float) -> Point2D
+cartesian : (number, number) -> Point2D
 cartesian (x, y) = { x = x, y = y }
 
-polar : (Float, Float) -> Point2D
+polar : (number, number) -> Point2D
 polar (r, phi) = { x = r * cos phi, y = r * sin phi }
 
-toCarthesian : Point2D -> (Float, Float)
+toCarthesian : Point2D -> (number, number)
 toCarthesian {x,y} = (x,y)
 
-toPolar : Point2D -> (Float, Float)
+toPolar : Point2D -> (number, number)
 toPolar p = let (r,u) = breakDown p
             in  (r,atan2 u.x u.y)
 
@@ -53,15 +49,15 @@ zero = from1D 0
 -------------------------
 
 -- map a function over both points
-map : (Float -> Float) -> Point2D -> Point2D
+map : (number -> number) -> Point2D -> Point2D
 map f {x,y} = { x = f x, y = f y }
 
 -- fold the two in a function
-fold : (Float -> Float -> Float) -> Point2D -> Float
+fold : (number -> number -> number) -> Point2D -> number
 fold f {x,y} = f x y
 
 -- zip two together like they're lists
-zipWith : (Float -> Float -> Float) -> Point2D -> Point2D -> Point2D
+zipWith : (number -> number -> number) -> Point2D -> Point2D -> Point2D
 zipWith f a b = { x = f a.x b.x, y = f a.y b.y }
 
 ----------------------------
@@ -89,19 +85,19 @@ e_div = zipWith (\a b -> a / b)
 -------------------------------------------------------
 
 -- addition with a scalar on the right
-pls : Point2D -> Float -> Point2D
+pls : Point2D -> number -> Point2D
 pls p s = e_pls p (from1D s)
 
 -- substraction with a scalar on the right
-min : Point2D -> Float -> Point2D
+min : Point2D -> number -> Point2D
 min p s = e_min p (from1D s)
 
 -- multiplication with a scalar on the right
-mul : Point2D -> Float -> Point2D
+mul : Point2D -> number -> Point2D
 mul p s = e_mul p (from1D s)
 
 -- division with a scalar on the right
-div : Point2D -> Float -> Point2D
+div : Point2D -> number -> Point2D
 div p s = e_div p (from1D s)
 
 ----------------------
@@ -109,19 +105,19 @@ div p s = e_div p (from1D s)
 ----------------------
 
 -- dot product
-dot : Point2D -> Point2D -> Float
+dot : Point2D -> Point2D -> number
 dot a b = fold (\a b -> a+b) <| e_mul a b
 
 -- magnitude
-magn : Point2D -> Float
+magn : Point2D -> number
 magn p = sqrt <| dot p p
 
 -- create a vector with this value for both dimensions
-from1D : Float -> Point2D
-from1D a = point2D a a
+from1D : number -> Point2D
+from1D a = Point2D a a
 
 -- calculate the unit vector given the magnitude of that vector
-unit' : Point2D -> Float -> Point2D
+unit' : Point2D -> number -> Point2D
 unit' = div
 
 -- unit vector (normalized vector)
@@ -129,6 +125,6 @@ unit : Point2D -> Point2D
 unit p = unit' p <| magn p
 
 -- get both the magnitude and the unit vector
-breakDown : Point2D -> (Float, Point2D)
+breakDown : Point2D -> (number, Point2D)
 breakDown p = let m = magn p
               in (m, unit' p m)

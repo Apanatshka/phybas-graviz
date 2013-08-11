@@ -1,13 +1,13 @@
 {- |
 Module        :  Main
-Description   :  Definition and drawing of a graph.
+Description   :  UI for displaying a graph.
 Copyright     :  (c) Jeff Smits
 License       :  GPL-3.0
 
 Maintainer    :  jeff.smits@gmail.com
 Stability     :  experimental
 Portability   :  portable
-Compatibility :  The Elm Compiler (pre-)0.9 (tracking git branch master)
+Compatibility :  The Elm Compiler 0.9
 
  | ---------------------------------------------------------------------- |
  | This program is free software: you can redistribute it and/or modify   |
@@ -28,49 +28,56 @@ Compatibility :  The Elm Compiler (pre-)0.9 (tracking git branch master)
 module Main where
 
 import List      as L
-import Dict (Dict)
+import Dict      (Dict)
 import Dict      as D
-import Set (Set)
+import Set       (Set)
 import Set       as S
 import Maybe     as M
---import Graphics  as G
 import Color     as C
 import Automaton as A
-import Point2D (Point2D)
+import Point2D   (Point2D)
 import Point2D   as P
-import General (Vector2D, NodeID, EdgeID, Node, Edge, Graph)
-import General   as Gen
+import Graph     (Vector2D, NodeID, EdgeID, Node, Edge, Graph)
+import Graph     as Gr
 import Physics   as Ph
-import TGF (TGFNode, TGFEdge, TGFGraph)
+import TGF       (TGFNode, TGFEdge, TGFGraph)
 import TGF
 import Keyboard
 import Mouse
 
-data Tool = Drag (Maybe Node)
+data Tool = Select | Drag (Maybe Node)
 data Mode = Simulation | Edit Tool [Node]
 type ProgramState = { graph : Graph, mode : Mode }
 
--- frameRate : FPS
-fr = 30
--- checkFrameRate : FPS -> Bool
-cfr r = r < (fr / 2)
--- collageSize
-cs = Gen.cs
--- clamp collage
-cc = clamp 0 cs
--- collageCenter
-ccenter = cs `div` 2
+frameRate = 30
+checkFrameRate r = r < (frameRate / 2)
 
+collageSize = 500
+collageCenter = collageSize / 2
+
+nodeRadius = 3
+nodesAt = Gr.nodesWithin nodeRadius
 
 colors = { node = { normal = C.blue, hover = C.cyan    }
          , edge = { normal = C.red,  hover = C.magenta }
          , collage = rgb 245 245 245
          }
 
+-- when input signal turns true, the toggle changes
+toggle : Bool -> Signal Bool -> Signal Bool
+toggle start input =
+  let toggleFun inputIsTrue (toggleVal,inputWasTrue) =
+        (if (not inputWasTrue) && inputIsTrue
+           then not toggleVal
+           else toggleVal,
+        inputIsTrue)
+  in fst <~ foldp toggleFun (start, False) input
+
 headToMaybeAndList : [a] -> (Maybe a, [a])
 headToMaybeAndList l = case l of
   h :: t -> (Just h, [h])
   []     -> (Nothing, [])
+
 
 editGraph : Bool -> Point2D -> [Node] -> ProgramState -> (ProgramState, [Node])
 editGraph mouseDown mouseRelPos hoverNodes programState = let
@@ -106,7 +113,7 @@ drawNodes g ncolor = let
 
 -- draw a node with color c and position p
 drawNode : Color -> Point2D -> Form
-drawNode c p = circle Gen.nodeRadius |> filled c |> move (p.x, p.y)
+drawNode c p = circle nodeRadius |> filled c |> move (p.x, p.y)
 
 -- draw an edge with color c from p1 to p2
 drawEdge : Color -> Point2D -> Point2D -> Form
@@ -122,12 +129,12 @@ drawEdges g ecolor = let
 
 relativeMousePosition : Point2D -> Point2D
 relativeMousePosition posV = let
-    fromCenter p = P.min p (toFloat ccenter)
-    negateY = P.e_mul <| P.point2D 1 (0-1)
+    fromCenter p = P.min p collageCenter
+    negateY = P.e_mul <| P.cartesian (1, -1)
   in negateY <| fromCenter <| posV
 
 layoutCollage : [Form] -> Element
-layoutCollage = color colors.collage . collage cs cs
+layoutCollage = color colors.collage . collage collageSize collageSize
 
 layout : (ProgramState, [Node]) -> Element
 layout (programState, hoverNodes) =
@@ -146,14 +153,14 @@ layout (programState, hoverNodes) =
 
 
 seconds : Signal Float
-seconds = keepIf cfr fr <| inSeconds <~ fps fr
+seconds = keepIf checkFrameRate frameRate <| inSeconds <~ fps frameRate
 
 simulate : Signal Bool
-simulate = Gen.toggle True Keyboard.space
+simulate = toggle True Keyboard.space
 
 step : Bool -> Float -> Bool -> Point2D -> ProgramState -> (ProgramState, [Node])
 step render timeDelta mouseDown relMousePos programState = let
-    hoverNodes = Gen.nodeAt programState.graph <| relMousePos
+    hoverNodes = nodesAt programState.graph <| relMousePos
   in if render
     then ({ graph = Ph.physicsStep timeDelta programState.graph, mode = Simulation }, hoverNodes)
     else editGraph mouseDown relMousePos hoverNodes programState
@@ -164,19 +171,19 @@ transform = step <~ simulate ~ seconds ~ Mouse.isDown ~ (relativeMousePosition .
 
 test1 : Graph
 test1 = {nodes = D.fromList [ (1,{nid=1,label="1",pos={x=15,y=15},vel={x=0,y=0},edges=S.fromList [1],bEdges=S.fromList [2]})
-                         , (2,{nid=2,label="2",pos={x=35,y= 5},vel={x=0,y=0},edges=S.fromList [3],bEdges=S.fromList [1]})
-                         , (3,{nid=3,label="3",pos={x=15,y=15},vel={x=0,y=0},edges=S.fromList [2],bEdges=S.fromList [3]})
-                         ], edges = D.fromList [ (1,{eid=1,idFrom=1,idTo=2,label="1"})
-                                               , (2,{eid=2,idFrom=3,idTo=1,label="2"})
-                                               , (3,{eid=3,idFrom=2,idTo=3,label="3"})
-                                               ]}
+                            , (2,{nid=2,label="2",pos={x=35,y= 5},vel={x=0,y=0},edges=S.fromList [3],bEdges=S.fromList [1]})
+                            , (3,{nid=3,label="3",pos={x=15,y=15},vel={x=0,y=0},edges=S.fromList [2],bEdges=S.fromList [3]})
+                            ], edges = D.fromList [ (1,{eid=1,idFrom=1,idTo=2,label="1"})
+                                                  , (2,{eid=2,idFrom=3,idTo=1,label="2"})
+                                                  , (3,{eid=3,idFrom=2,idTo=3,label="3"})
+                                                  ]}
 
 test2 : Graph
-test2 = Gen.createGraph { nodes = [{id=1,label="1"},{id=2,label="2"},{id=3,label="3"},{id=4,label="4"}], edges = [{idFrom=1,idTo=2,label="1"},{idFrom=3,idTo=1,label="2"},{idFrom=2,idTo=3,label="3"},{idFrom=1,idTo=4,label="4"},{idFrom=2,idTo=4,label="5"},{idFrom=4,idTo=3,label="6"}] }
+test2 = Gr.createGraph (nodeRadius*4) { nodes = [{id=1,label="1"},{id=2,label="2"},{id=3,label="3"},{id=4,label="4"}], edges = [{idFrom=1,idTo=2,label="1"},{idFrom=3,idTo=1,label="2"},{idFrom=2,idTo=3,label="3"},{idFrom=1,idTo=4,label="4"},{idFrom=2,idTo=4,label="5"},{idFrom=4,idTo=3,label="6"}] }
 
 -- from: http://docs.yworks.com/yfiles/doc/developers-guide/tgf.html
 test3 : Graph
-test3 = Gen.createGraph <| TGF.fromString """1 January
+test3 = Gr.createGraph (nodeRadius*4) <| TGF.fromString """1 January
 2 March
 3 April
 4 May

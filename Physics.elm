@@ -33,25 +33,30 @@ References:
 
 module Physics where
 
-import Dict (Dict)
+import Dict    (Dict)
 import Dict    as D
-import Set (Set)
+import Set     (Set)
 import Set     as S
 import Point2D (Point2D)
 import Point2D as P
-import General (Vector2D, Node, Edge, Graph)
-import General as Gen
+import Graph (Vector2D, Node, Edge, Graph)
 
--- nodeConstants = { mass,   radius }
-nc               = { m = 10, r = Gen.nodeRadius }
+nodeConstants  = { mass = 10, radius = 3 }
+forceConstants = { repulsion = 1000000, springConstant = 50, equilibriumLength = 60 }
 
--- forceConstants = { repulsion,   springConstant (in N/m), equilibriumLength }
-fc                = { r = 1000000, sc = 50,                 el = 60           }
+precision = 1000000
+small_value = 1 / (precision^2)
 
--- maximum speed
-ms = Gen.cs/4
--- clamp maximum speed
-cms = clamp (-ms) ms
+-- delta of the position of two nodes {- plus a small pseudorandom value -}
+positionDelta : Node -> Node -> Point2D
+positionDelta from to = P.e_min to.pos from.pos
+{-
+  let d a b = (toFloat a) / (toFloat b)
+      r   = P.carthesian (from.nid `d` to.nid) (to.nid `d` (to.nid - from.nid))
+      srv = P.mul r small_value -- small (pseudo-)random value
+  in P.e_pls srv <|
+-}
+
 
 repulsion : Graph -> Node -> Vector2D
 repulsion g n =
@@ -59,9 +64,9 @@ repulsion g n =
     if cn.nid == n.nid
       then f
       else
-        let d = Gen.positionDelta n cn
+        let d = positionDelta n cn
             (l,u) = P.breakDown d
-            f' = -(fc.r / l^2)
+            f' = -(forceConstants.repulsion / l^2)
         in P.e_pls f <| P.mul u f'
   in D.foldl r P.zero g.nodes
 
@@ -71,8 +76,8 @@ nodeStep delta g =
       appRep n =
         let appRep' f =
           let (l,u) = P.breakDown f
-              vl = l * delta / nc.m
-              v = P.mul u <| cms vl
+              vl = l * delta / nodeConstants.mass
+              v = P.mul u vl
           in{ n | vel <- P.e_pls n.vel v }
         in maybe n appRep' <| D.lookup n.nid mrf
   in { g | nodes <- D.map appRep g.nodes }
@@ -88,9 +93,9 @@ attraction g n =
           if S.toList ei == []
           then f
           else
-            let d = Gen.positionDelta n cn
+            let d = positionDelta n cn
                 (l,u) = P.breakDown d
-                f' = fc.sc * (l - fc.el)
+                f' = forceConstants.springConstant * (l - forceConstants.equilibriumLength)
             in P.e_pls f <| P.mul u f'
   in D.foldl a P.zero g.nodes
 
@@ -100,8 +105,8 @@ edgeStep delta g =
       appAttr n =
         let appAttr' f =
           let (l,u) = P.breakDown f
-              vl = l * delta / nc.m
-              v = P.mul u <| cms vl
+              vl = l * delta / nodeConstants.mass
+              v = P.mul u vl
           in{ n | vel <- P.e_pls n.vel v }
         in maybe n appAttr' <| D.lookup n.nid maf
   in { g | nodes <- D.map appAttr g.nodes }
@@ -110,12 +115,12 @@ drag : Graph -> Node -> Vector2D
 drag _ n =
   let (l,u) = P.breakDown n.vel
 
-      rho = 998.2071        -- kg/m^3 (20 degrees Celsius water [2])
-      dF  = 1/3000          -- extra density factor, for tweaking
+      rho = 998.2071   -- kg/m^3 (20 degrees Celsius water [2])
+      dF  = 1/3000     -- extra density factor, for tweaking
 
-      dens  = dF * rho      -- kg/m^3, density
-      coeff = 0.47          -- dimensionless (coefficient for a circular shape [3])
-      area  = pi * nc.r ^ 2 -- m^2, area
+      dens  = dF * rho -- kg/m^3, density
+      coeff = 0.47     -- dimensionless (coefficient for a circular shape [3])
+      area  = pi * nodeConstants.radius ^ 2 -- m^2
 
       f = -(l^2 * dens * coeff * area / 2) -- N
   in P.mul u f
@@ -126,8 +131,9 @@ dragStep delta g =
       appDrag n =
         let appDrag' f =
           let (l,u) = P.breakDown f
-              vl = l * delta / nc.m
-              vl' = clamp 0 (P.magn n.vel) vl--if vl > P.magn n.vel then P.magn n.vel else vl
+              vl = l * delta / nodeConstants.mass
+              -- don't have drag force change the velocity to anything faster than the last velocity
+              vl' = clamp 0 (P.magn n.vel) vl
               v = P.mul u vl'
           in{ n | vel <- P.e_pls n.vel v }
         in maybe n appDrag' <| D.lookup n.nid mdf
@@ -139,13 +145,15 @@ velocityStep delta g =
       vel2 pos vel = P.e_pls pos (P.mul vel delta)
   in { g | nodes <- D.map vel g.nodes }
 
+{-
 frictionStep : Float -> Graph -> Graph
 frictionStep delta g =
   let fric  n   = { n | vel <- fric2 n.vel }
       fric2 vel = P.map fric3 vel
-      -- simple rounding off to ff amount of digits after the dot.
-      fric3 v   = toFloat (round <| Gen.ff * v) / Gen.ff
+      -- simple rounding off to an amount of digits after the dot.
+      fric3 v   = toFloat (round <| precision * v) / precision
   in { g | nodes <- D.map fric g.nodes }
+-}
 
 
 physicsStep : Float -> Graph -> Graph
