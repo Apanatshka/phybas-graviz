@@ -35,6 +35,7 @@ import Set       as S
 import Maybe     as M
 import Color     as C
 import Automaton as A
+
 import Point2D   (Point2D)
 import Point2D   as P
 import Graph     (Vector2D, NodeID, EdgeID, Node, Edge, Graph)
@@ -42,26 +43,17 @@ import Graph     as Gr
 import Physics   as Ph
 import TGF       (TGFNode, TGFEdge, TGFGraph)
 import TGF
+import GUI       (ProgramState, Mode, Simulation, Edit, Tool, Select, Drag)
+import GUI
+
+import Window
 import Keyboard
 import Mouse
-
-data Tool = Select | Drag (Maybe Node)
-data Mode = Simulation | Edit Tool [Node]
-type ProgramState = { graph : Graph, mode : Mode }
 
 frameRate = 30
 checkFrameRate r = r < (frameRate / 2)
 
-collageSize = 500
-collageCenter = collageSize / 2
-
-nodeRadius = 3
-nodesAt = Gr.nodesWithin nodeRadius
-
-colors = { node = { normal = C.blue, hover = C.cyan    }
-         , edge = { normal = C.red,  hover = C.magenta }
-         , collage = rgb 245 245 245
-         }
+nodesAt = Gr.nodesWithin GUI.nodeRadius
 
 -- when input signal turns true, the toggle changes
 toggle : Bool -> Signal Bool -> Signal Bool
@@ -78,6 +70,12 @@ headToMaybeAndList l = case l of
   h :: t -> (Just h, [h])
   []     -> (Nothing, [])
 
+createGraph = let nc = Ph.nodeConstants
+              in Gr.createGraph (nc.radius * 4)
+
+
+seconds : Signal Float
+seconds = keepIf checkFrameRate frameRate <| inSeconds <~ fps frameRate
 
 editGraph : Bool -> Point2D -> [Node] -> ProgramState -> (ProgramState, [Node])
 editGraph mouseDown mouseRelPos hoverNodes programState = let
@@ -103,61 +101,6 @@ editGraph mouseDown mouseRelPos hoverNodes programState = let
         newProgramState = { graph = newGraph, mode = newMode }
       in (newProgramState, newSelection)
 
-drawGraph : Graph -> (NodeID -> Color) -> (EdgeID -> Color) -> [Form]
-drawGraph g ncolor ecolor = (drawEdges g ecolor) ++ (drawNodes g ncolor)
-
-drawNodes : Graph -> (NodeID -> Color) -> [Form]
-drawNodes g ncolor = let
-    node2form n = drawNode (ncolor n.nid) n.pos
-  in (L.map node2form <| D.values g.nodes)
-
--- draw a node with color c and position p
-drawNode : Color -> Point2D -> Form
-drawNode c p = circle nodeRadius |> filled c |> move (p.x, p.y)
-
--- draw an edge with color c from p1 to p2
-drawEdge : Color -> Point2D -> Point2D -> Form
-drawEdge c p1 p2 = segment (p1.x, p1.y) (p2.x, p2.y) |> traced (solid c)
-
-drawEdges : Graph -> (EdgeID -> Color) -> [Form]
-drawEdges g ecolor = let
-    edge2form _ e acc =
-        case (D.lookup e.idFrom g.nodes, D.lookup e.idTo g.nodes) of
-            (Just n1, Just n2) -> (drawEdge (ecolor e.eid) n1.pos n2.pos) :: acc
-            _                  -> acc
-  in  (D.foldl edge2form [] g.edges)
-
-relativeMousePosition : Point2D -> Point2D
-relativeMousePosition posV = let
-    fromCenter p = P.min p collageCenter
-    negateY = P.e_mul <| P.cartesian (1, -1)
-  in negateY <| fromCenter <| posV
-
-layoutCollage : [Form] -> Element
-layoutCollage = color colors.collage . collage collageSize collageSize
-
-layout : (ProgramState, [Node]) -> Element
-layout (programState, hoverNodes) =
-  let hoverNodeEdges = L.foldl (\n acc -> S.union n.edges <| S.union n.bEdges acc) S.empty hoverNodes
-
-      ncolor nid = if any (\hn -> nid == hn.nid) hoverNodes then colors.node.hover else colors.node.normal
-      ecolor eid = if S.member eid hoverNodeEdges           then colors.edge.hover else colors.edge.normal
-
-      info = flow down <| L.map (plainText . (.label)) hoverNodes
-      drawnGraph = layoutCollage <| drawGraph programState.graph ncolor ecolor
-
-      modeText = case programState.mode of
-        Simulation -> "Simulation"
-        Edit _ _   -> "Edit"
-  in layers [drawnGraph, plainText <| "Mode: " ++ modeText] `beside` info
-
-
-seconds : Signal Float
-seconds = keepIf checkFrameRate frameRate <| inSeconds <~ fps frameRate
-
-simulate : Signal Bool
-simulate = toggle True Keyboard.space
-
 step : Bool -> Float -> Bool -> Point2D -> ProgramState -> (ProgramState, [Node])
 step render timeDelta mouseDown relMousePos programState = let
     hoverNodes = nodesAt programState.graph <| relMousePos
@@ -166,7 +109,7 @@ step render timeDelta mouseDown relMousePos programState = let
     else editGraph mouseDown relMousePos hoverNodes programState
 
 transform : Signal (ProgramState -> (ProgramState, [Node]))
-transform = step <~ simulate ~ seconds ~ Mouse.isDown ~ (relativeMousePosition . P.cartesian . (\(a,b) -> (toFloat a, toFloat b)) <~ Mouse.position)
+transform = step <~ GUI.simulate ~ seconds ~ Mouse.isDown ~ (GUI.relativeMousePosition <~ dimensions ~ (P.cartesian . (\(a,b) -> (toFloat a, toFloat b)) <~ Mouse.position))
 
 
 test1 : Graph
@@ -179,11 +122,11 @@ test1 = {nodes = D.fromList [ (1,{nid=1,label="1",pos={x=15,y=15},vel={x=0,y=0},
                                                   ]}
 
 test2 : Graph
-test2 = Gr.createGraph (nodeRadius*4) { nodes = [{id=1,label="1"},{id=2,label="2"},{id=3,label="3"},{id=4,label="4"}], edges = [{idFrom=1,idTo=2,label="1"},{idFrom=3,idTo=1,label="2"},{idFrom=2,idTo=3,label="3"},{idFrom=1,idTo=4,label="4"},{idFrom=2,idTo=4,label="5"},{idFrom=4,idTo=3,label="6"}] }
+test2 = createGraph { nodes = [{id=1,label="1"},{id=2,label="2"},{id=3,label="3"},{id=4,label="4"}], edges = [{idFrom=1,idTo=2,label="1"},{idFrom=3,idTo=1,label="2"},{idFrom=2,idTo=3,label="3"},{idFrom=1,idTo=4,label="4"},{idFrom=2,idTo=4,label="5"},{idFrom=4,idTo=3,label="6"}] }
 
 -- from: http://docs.yworks.com/yfiles/doc/developers-guide/tgf.html
 test3 : Graph
-test3 = Gr.createGraph (nodeRadius*4) <| TGF.fromString """1 January
+test3 = createGraph <| TGF.fromString """1 January
 2 March
 3 April
 4 May
@@ -202,8 +145,10 @@ test3 = Gr.createGraph (nodeRadius*4) <| TGF.fromString """1 January
 7 6
 7 1"""
 
-programState : Signal (ProgramState, [Node])
-programState = foldp (\transformFun (graph,_) -> transformFun graph) ({graph=test3,mode=Simulation}, []) transform
+programState' : Signal (ProgramState, [Node])
+programState' = foldp (\transformFun (graph,_) -> transformFun graph) ({graph=test3,mode=Simulation}, []) transform
+
+dimensions = GUI.dimensionsFromWindow <~ Window.dimensions
 
 main : Signal Element
-main = layout <~ programState
+main = GUI.scene <~ dimensions ~ programState'
