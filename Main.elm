@@ -50,6 +50,8 @@ import Window
 import Keyboard
 import Mouse
 
+type SubGraph = { nodes: Set NodeID, edges: Set EdgeID }
+
 frameRate = 30
 checkFrameRate r = r < (frameRate / 2)
 
@@ -101,11 +103,25 @@ editGraph mouseDown mouseRelPos hoverNodes programState = let
         newProgramState = { graph = newGraph, mode = newMode }
       in (newProgramState, newSelection)
 
+{-
+modeStep lastMode (sim,but) =
+        if sim
+          then Simulation
+          else case lastMode of
+            Simulation              -> Edit Select []
+            Edit tool selectedNodes ->
+              case but of
+                ButtonSelect -> Edit Select selectedNodes
+                ButtonMove   -> Edit (Drag Nothing) selectedNodes -- TODO: use Move/Rotate tools
+                ButtonRotate -> Edit tool selectedNodes           -- TODO: use Move/Rotate tools
+mode : Signal Mode
+mode = foldp modeStep (Edit Select []) <| (,) <~ simulate ~ buttonsSignal -}
+
 step : Bool -> Float -> Bool -> Point2D -> ProgramState -> (ProgramState, [Node])
 step render timeDelta mouseDown relMousePos programState = let
     hoverNodes = nodesAt programState.graph <| relMousePos
   in if render
-    then ({ graph = Ph.physicsStep timeDelta programState.graph, mode = Simulation }, hoverNodes)
+    then (ProgramState (Ph.physicsStep timeDelta programState.graph) Simulation, hoverNodes)
     else editGraph mouseDown relMousePos hoverNodes programState
 
 transform : Signal (ProgramState -> (ProgramState, [Node]))
@@ -113,16 +129,17 @@ transform = step <~ GUI.simulate ~ seconds ~ Mouse.isDown ~ (GUI.relativeMousePo
 
 
 test1 : Graph
-test1 = {nodes = D.fromList [ (1,{nid=1,label="1",pos={x=15,y=15},vel={x=0,y=0},edges=S.fromList [1],bEdges=S.fromList [2]})
-                            , (2,{nid=2,label="2",pos={x=35,y= 5},vel={x=0,y=0},edges=S.fromList [3],bEdges=S.fromList [1]})
-                            , (3,{nid=3,label="3",pos={x=15,y=15},vel={x=0,y=0},edges=S.fromList [2],bEdges=S.fromList [3]})
-                            ], edges = D.fromList [ (1,{eid=1,idFrom=1,idTo=2,label="1"})
-                                                  , (2,{eid=2,idFrom=3,idTo=1,label="2"})
-                                                  , (3,{eid=3,idFrom=2,idTo=3,label="3"})
-                                                  ]}
+test1 = Graph (D.fromList [ (1, Node 1 "1" (P.cartesian (15, 15)) P.zero (S.fromList [1]) (S.fromList [2]))
+                          , (2, Node 2 "2" (P.cartesian (35, 5 ))  P.zero (S.fromList [3]) (S.fromList [1]))
+                          , (3, Node 3 "3" (P.cartesian (15, 15)) P.zero (S.fromList [2]) (S.fromList [3]))
+                          ])
+              (D.fromList [ (1, Edge 1 1 2 "1")
+                          , (2, Edge 2 3 1 "2")
+                          , (3, Edge 3 2 3 "3")
+                          ])
 
 test2 : Graph
-test2 = createGraph { nodes = [{id=1,label="1"},{id=2,label="2"},{id=3,label="3"},{id=4,label="4"}], edges = [{idFrom=1,idTo=2,label="1"},{idFrom=3,idTo=1,label="2"},{idFrom=2,idTo=3,label="3"},{idFrom=1,idTo=4,label="4"},{idFrom=2,idTo=4,label="5"},{idFrom=4,idTo=3,label="6"}] }
+test2 = createGraph (TGFGraph [TGFNode 1 "1", TGFNode 2 "2", TGFNode 3 "3", TGFNode 4 "4"] [TGFEdge 1 2 "1", TGFEdge 3 1 "2", TGFEdge 2 3 "3", TGFEdge 1 4 "4", TGFEdge 2 4 "5", TGFEdge 4 3 "6"])
 
 -- from: http://docs.yworks.com/yfiles/doc/developers-guide/tgf.html
 test3 : Graph
