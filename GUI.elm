@@ -3,17 +3,17 @@ module GUI where
 import open Graphics.Input
 import Point2D (Point2D)
 import Point2D as P
-import Graph     (Vector2D, NodeID, EdgeID, Node, Edge, Graph)
-import Graph     as Gr
-import List      as L
-import Dict      (Dict)
-import Dict      as D
-import Set       (Set)
-import Set       as S
-import Color     as C
+import Graph   (Vector2D, NodeID, EdgeID, Node, Edge, Graph)
+import Graph   as Gr
+import List    as L
+import Dict    (Dict)
+import Dict    as D
+import Set     (Set)
+import Set     as S
+import Color   as C
 
 
-data Tool = Select | Drag (Maybe Node)
+data Tool = Select | Drag (Maybe Node) | Move (Maybe Point2D) | Rotate (Maybe Point2D)
 data Mode = Simulation | Edit Tool [Node]
 type ProgramState = { graph : Graph, mode : Mode }
 type Dimensions a = { width : a, height : a, dimensions : (a,a) }
@@ -44,7 +44,10 @@ scene dims ((programState,hoverNodes) as ps') =
       bBar  = dims.buttonBar
       rArea = dims.renderArea
       pan   = dims.panel
-  in container win.width win.height midTop <| (buttonBar programState.mode bBar.width bBar.height `above` renderArea ps' rArea.size) `beside` panel hoverNodes pan.width pan.height
+  in container win.width win.height midTop
+       <| (buttonBar programState.mode bBar.width bBar.height
+            `above` renderArea ps' rArea.size)
+          `beside` panel hoverNodes pan.width pan.height
 
 dimensionsFromWindow (winWidth, winHeight) =
   let (height, panelWidth, renderAreaSize) =
@@ -64,7 +67,7 @@ dimensionsFromWidth width =
   in (height, panelWidth, renderAreaSize)
 
 dimensionsFromHeight height =
-  let renderAreaSize = height - 20
+  let renderAreaSize = height - buttonSize
       panelWidth = floor <| (*) 0.25 <| toFloat renderAreaSize
   in (height, panelWidth, renderAreaSize)
 
